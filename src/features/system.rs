@@ -204,12 +204,12 @@ pub fn memory() -> Memory {
 
     Memory {
         ram: MemoryUsage {
-            used_kB: system.used_memory(),
-            total_kB: system.total_memory(),
+            used_kB: system.used_memory().div_ceil(1024),
+            total_kB: system.total_memory().div_ceil(1024),
         },
         swap: MemoryUsage {
-            used_kB: system.used_swap(),
-            total_kB: system.total_swap(),
+            used_kB: system.used_swap().div_ceil(1024),
+            total_kB: system.total_swap().div_ceil(1024),
         },
     }
 }
@@ -295,8 +295,8 @@ pub fn process() -> Vec<Process> {
                 environment: process.environ().into(),
                 working_directory: process.cwd().to_str().unwrap_or_default().into(),
                 root_directory: process.root().to_str().unwrap_or_default().into(),
-                used_memory_kB: process.memory(),
-                virtual_memory_kB: process.virtual_memory(),
+                used_memory_kB: process.memory().div_ceil(1024),
+                virtual_memory_kB: process.virtual_memory().div_ceil(1024),
                 parent_process: process.parent().and_then(|pid| Some(pid.as_u32())),
                 running_time: process.start_time(),
                 cpu_usage: process.cpu_usage(),
