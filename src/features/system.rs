@@ -214,7 +214,6 @@ pub fn memory() -> Memory {
     }
 }
 
-#[cached(time = 5)]
 pub fn network() -> Vec<Network> {
     let mut system = SYSTEM.lock().unwrap();
     system.refresh_networks();
