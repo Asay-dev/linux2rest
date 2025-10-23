@@ -39,6 +39,7 @@ impl KernelMessage {
 struct KernelService {
     messages: Vec<KernelMessage>,
     senders: Vec<Sender<String>>,
+    #[allow(dead_code)]
     main_loop_thread: std::thread::JoinHandle<()>,
 }
 
