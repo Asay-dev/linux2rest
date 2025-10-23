@@ -34,28 +34,8 @@ pub fn init() {
         .with_thread_names(true)
         .with_filter(console_env_filter);
 
-    // Configure the file log
-    let file_env_filter = if verbose {
-        EnvFilter::new(LevelFilter::TRACE.to_string())
-    } else {
-        EnvFilter::new(LevelFilter::DEBUG.to_string())
-    };
-    let dir = cli::args().as_ref().log_path.clone();
-    let file_appender = tracing_appender::rolling::hourly(dir, "linux2rest.", ".log");
-    let file_layer = fmt::Layer::new()
-        .with_writer(file_appender)
-        .with_ansi(false)
-        .with_file(true)
-        .with_line_number(true)
-        .with_span_events(fmt::format::FmtSpan::NONE)
-        .with_target(false)
-        .with_thread_ids(true)
-        .with_thread_names(true)
-        .with_filter(file_env_filter);
-
     let subscriber = tracing_subscriber::registry()
-        .with(console_layer)
-        .with(file_layer);
+        .with(console_layer);
     tracing::subscriber::set_global_default(subscriber).expect("Unable to set a global subscriber");
 
     info!(
