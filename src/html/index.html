@@ -1,98 +1,686 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title>System Information</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>linux2rest Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      .tab-button {
-        padding: 6px 10px;
-        border-top-left-radius: 3px;
-        border-top-right-radius: 3px;
-        border: 1px solid #ccc;
-        cursor: pointer;
-        background: #f0f0f0;
-        margin-bottom: -1px;
-        margin-right: -1px;
-      }
-      .tab-button:hover {
-        background: #e0e0e0;
-      }
-      .tab-button.active {
-        background: #e0e0e0;
-      }
-      .tab {
-        border: 1px solid #ccc;
-        padding: 10px;
-      }
-
-      #pretty th {
-        padding-top: 11px;
-        padding-bottom: 11px;
-        background-color: #007acc;
-        color: white;
-        text-align: left;
+      :root {
+        --bg-gradient: radial-gradient(
+          circle at 15% 20%,
+          #1e293b 0%,
+          #0f172a 38%,
+          #020617 100%
+        );
+        --surface: rgba(14, 20, 37, 0.78);
+        --surface-strong: rgba(15, 22, 40, 0.92);
+        --surface-muted: rgba(148, 163, 184, 0.12);
+        --border: rgba(148, 163, 184, 0.2);
+        --highlight: #38bdf8;
+        --highlight-strong: #0ea5e9;
+        --text-primary: #e2e8f0;
+        --text-secondary: #94a3b8;
+        --shadow-lg: 0 32px 60px rgba(2, 6, 23, 0.55);
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
       }
 
-      td,
-      th {
-        border: 1px solid #ddd;
-        text-align: left;
-        padding: 8px;
+      * {
+        box-sizing: border-box;
       }
 
-      table {
-        font-size: 16px;
-        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-        border-collapse: collapse;
-        border-spacing: 0;
-        width: 100%;
-      }
-
-      tr:nth-child(even) {
-        background-color: #93d0f0;
-      }
-
-      .dmesg {
+      html,
+      body {
         margin: 0;
+        padding: 0;
+        min-height: 100%;
       }
 
-      span.toggle {
+      body {
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: var(--bg-gradient);
+        color: var(--text-primary);
+        display: flex;
+      }
+
+      a {
+        color: var(--highlight);
+      }
+
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: none;
         cursor: pointer;
+      }
+
+      .page {
+        flex: 1;
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 270px;
+        padding: 2.4rem 1.9rem;
+        backdrop-filter: blur(18px);
+        background: rgba(2, 6, 23, 0.7);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .brand-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--highlight);
+      }
+
+      .brand-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .tab-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .tab-button {
+        text-align: left;
+        padding: 0.85rem 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+      }
+
+      .tab-button:hover {
+        color: var(--text-primary);
+        background: rgba(56, 189, 248, 0.12);
+      }
+
+      .tab-button.active {
+        color: var(--text-primary);
+        background: linear-gradient(
+          135deg,
+          rgba(56, 189, 248, 0.18),
+          rgba(14, 165, 233, 0.35)
+        );
+        border-color: rgba(56, 189, 248, 0.45);
+        box-shadow: 0 14px 32px rgba(14, 165, 233, 0.22);
+      }
+
+      .tab-label {
+        text-transform: capitalize;
+      }
+
+      .tab-indicator {
+        font-size: 1rem;
+        transition: transform 0.2s ease;
+      }
+
+      .tab-button.active .tab-indicator {
+        transform: translateX(2px);
+      }
+
+      .content {
+        flex: 1;
+        padding: 2.8rem 3.2rem;
+        overflow-y: auto;
+        display: flex;
+        justify-content: center;
+      }
+
+      .tab-view {
+        width: 100%;
+        max-width: 1180px;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.6rem;
+      }
+
+      .panel-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      .panel-header p {
+        margin: 0.4rem 0 0;
+        color: var(--text-secondary);
+        max-width: 520px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.55rem 1.15rem;
+        border-radius: 999px;
+        border: 1px solid rgba(56, 189, 248, 0.5);
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 10px 20px rgba(8, 145, 178, 0.2);
+        min-width: 110px;
+      }
+
+      .btn:hover {
+        background: rgba(14, 165, 233, 0.2);
+        border-color: rgba(14, 165, 233, 0.6);
+      }
+
+      .btn.secondary {
+        border-color: rgba(148, 163, 184, 0.35);
+        background: rgba(148, 163, 184, 0.12);
+        box-shadow: none;
+      }
+
+      .btn.secondary:hover {
+        background: rgba(148, 163, 184, 0.18);
+      }
+
+      .panel-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .panel-body.two-col {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: var(--surface-strong);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        padding: 1.6rem;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+
+      .card-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .card-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .card-header p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .metric-card {
+        background: var(--surface-muted);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        padding: 1rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .metric-label {
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        color: var(--text-secondary);
+      }
+
+      .metric-value {
+        font-size: 1.08rem;
+        font-weight: 600;
+      }
+
+      .metric-sub {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .table-wrapper {
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.17);
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.75);
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table thead {
+        background: rgba(56, 189, 248, 0.18);
+      }
+
+      .data-table th {
+        padding: 0.9rem 0.8rem;
+        text-align: left;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .data-table td {
+        padding: 0.75rem 0.8rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        border-top: 1px solid rgba(148, 163, 184, 0.08);
+      }
+
+      .data-table tbody tr:hover {
+        background: rgba(56, 189, 248, 0.12);
+      }
+
+      .progress {
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.2);
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+        border-radius: 999px;
+        transition: width 0.25s ease;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        border: 1px dashed rgba(148, 163, 184, 0.28);
+        background: rgba(148, 163, 184, 0.1);
+        color: var(--text-secondary);
+      }
+
+      .empty-state.error {
+        color: #fca5a5;
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(248, 113, 113, 0.4);
+      }
+
+      .log-card {
+        padding: 0;
+      }
+
+      .log-stream {
+        max-height: 520px;
+        overflow-y: auto;
+        padding: 1.3rem 1.4rem;
+        background: rgba(10, 16, 30, 0.95);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        line-height: 1.45;
+      }
+
+      .log-placeholder {
+        margin: 0;
+        padding: 1rem 0;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .log-line {
+        margin: 0;
+        padding: 0.35rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        white-space: pre-wrap;
+      }
+
+      .log-line:last-child {
+        border-bottom: none;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-secondary);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(148, 163, 184, 0.7);
+        box-shadow: 0 0 8px rgba(148, 163, 184, 0.5);
+      }
+
+      .status-badge.online {
+        border-color: rgba(74, 222, 128, 0.4);
+        background: rgba(34, 197, 94, 0.16);
+        color: #bbf7d0;
+      }
+
+      .status-badge.online .status-dot {
+        background: #34d399;
+        box-shadow: 0 0 8px rgba(52, 211, 153, 0.8);
+      }
+
+      .status-badge.offline {
+        border-color: rgba(248, 113, 113, 0.4);
+        background: rgba(248, 113, 113, 0.18);
+        color: #fecaca;
+      }
+
+      .status-badge.offline .status-dot {
+        background: #f87171;
+        box-shadow: 0 0 8px rgba(248, 113, 113, 0.9);
+      }
+
+      .badge-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        background: rgba(56, 189, 248, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        color: var(--text-primary);
+      }
+
+      .sensor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .cpu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .cpu-row {
+        background: rgba(148, 163, 184, 0.08);
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .cpu-row-header {
+        display: flex;
+        align-items: baseline;
+        gap: 0.35rem;
+      }
+
+      .memory-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.2rem;
+      }
+
+      .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+
+      .timeline-entry {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .timeline-time {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        min-width: 160px;
+      }
+
+      .timeline-label {
+        font-weight: 500;
+      }
+
+      .udev-tree {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .udev-node {
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 0.85rem 1rem;
+      }
+
+      .udev-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+      }
+
+      .udev-toggle .chevron {
+        font-size: 0.9rem;
+        color: var(--highlight);
+      }
+
+      .udev-toggle code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.82rem;
+        background: rgba(8, 12, 24, 0.85);
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+      }
+
+      .udev-details {
+        margin-top: 0.7rem;
+        padding: 0.9rem 1rem;
+        background: rgba(8, 12, 24, 0.9);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        overflow-x: auto;
+      }
+
+      .udev-details pre {
+        margin: 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      .udev-children {
+        list-style: none;
+        margin: 0.6rem 0 0 1.2rem;
+        padding-left: 1.2rem;
+        border-left: 1px dashed rgba(148, 163, 184, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      @media (max-width: 1120px) {
+        .content {
+          padding: 2.2rem;
+        }
+      }
+
+      @media (max-width: 940px) {
+        .page {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 1.8rem 1.6rem;
+        }
+
+        .content {
+          padding: 1.8rem;
+        }
+
+        .tab-list {
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
+
+        .tab-button {
+          flex: 1 1 140px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .panel-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .btn {
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <div id="app" class="demo">
-      <button
-        v-for="tab in tabs"
-        v-bind:key="tab"
-        v-bind:class="['tab-button', { active: current_tab === tab }]"
-        v-on:click="current_tab = tab"
-      >
-        {{ tab }}
-      </button>
-
-      <component v-bind:is="currentTabComponent" class="tab"></component>
+    <div id="app" class="app-shell">
+      <div class="page">
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="brand-title">linux2rest</div>
+            <div class="brand-subtitle">Realtime operating system insights</div>
+          </div>
+          <nav class="tab-list">
+            <button
+              v-for="tab in tabs"
+              :key="tab"
+              :class="['tab-button', { active: current_tab === tab }]"
+              @click="current_tab = tab"
+            >
+              <span class="tab-label">{{ tab.charAt(0).toUpperCase() + tab.slice(1) }}</span>
+              <span class="tab-indicator" v-if="current_tab === tab">></span>
+            </button>
+          </nav>
+          <div class="sidebar-footer">
+            <span class="status-dot"></span>
+            <span>API served locally on port 6030</span>
+          </div>
+        </aside>
+        <main class="content">
+          <component :is="currentTabComponent" class="tab-view"></component>
+        </main>
+      </div>
     </div>
     <script src="vue.js"></script>
     <script>
-      // Cache to be used between modules
       const cache = {};
-      const request = async function(name) {
-        const response_content = await fetch(`${name}`);
-        return await response_content.json();
+      const request = async (endpoint) => {
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error("Request failed");
+        }
+        return response.json();
       };
 
       const app = Vue.createApp({
-        mounted: function() {},
-        methods: {},
-        data: function() {
+        data() {
           return {
             tabs: ["netstat", "system", "udev", "kernel", "platform"],
             current_tab: "system",
           };
         },
         computed: {
-          currentTabComponent: function() {
-            return "tab-" + this.current_tab;
+          currentTabComponent() {
+            return `tab-${this.current_tab}`;
           },
         },
       });
@@ -104,56 +692,121 @@
             this.data = content;
             return;
           }
-
           this.updateData();
         },
-        methods: {
-          updateData: async function() {
-            this.data = "loading..";
-            this.data = await request("netstat");
-            cache["netstat"] = this.data;
-          },
-        },
-        data: function() {
+        data() {
           return {
-            data: "loading..",
+            data: "Loading...",
           };
         },
+        computed: {
+          payload() {
+            return typeof this.data === "string" ? null : this.data;
+          },
+          sortedTcp() {
+            if (!this.payload || !Array.isArray(this.payload.tcp)) {
+              return [];
+            }
+            return [...this.payload.tcp].sort(
+              (a, b) => a.local.port - b.local.port
+            );
+          },
+          sortedUdp() {
+            if (!this.payload || !Array.isArray(this.payload.udp)) {
+              return [];
+            }
+            return [...this.payload.udp].sort(
+              (a, b) => a.local.port - b.local.port
+            );
+          },
+        },
+        methods: {
+          async updateData() {
+            this.data = "Loading...";
+            try {
+              const payload = await request("netstat");
+              this.data = payload;
+              cache["netstat"] = payload;
+            } catch (error) {
+              console.error(error);
+              this.data = "Unable to load data";
+            }
+          },
+          formatPids(value) {
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+              return "N/A";
+            }
+            return Array.isArray(value) ? value.join(", ") : value;
+          },
+        },
         template: `
-          <button v-on:click="updateData()">Update</button>
-          <div style="display: flex; column-gap: 1em">
-          <div style="width:50%">
-          <h3>TCP</h3>
-          <table style="width:100%">
-            <tr>
-              <th>PIDS</th>
-              <th>State</th>
-              <th>Local</th>
-              <th>Remote</th>
-            </tr>
-            <tr v-for="tcp in data.tcp.sort((a, b) => a.local.port - b.local.port)">
-              <td>{{tcp.pids}}</td>
-              <td>{{tcp.state}}</td>
-              <td>{{tcp.local.address}}:{{tcp.local.port}}</td>
-              <td>{{tcp.remote.address}}:{{tcp.remote.port}}</td>
-            </tr>
-          </table>
-          </div>
-
-          <div style="width:50%">
-          <h3>UDP</h3>
-          <table style="width:100%">
-            <tr>
-              <th>PIDS</th>
-              <th>Local</th>
-            </tr>
-            <tr v-for="udp in data.udp.sort((a, b) => a.local.port - b.local.port)">
-              <td>{{udp.pids}}</td>
-              <td>{{udp.local.address}}:{{udp.local.port}}</td>
-            </tr>
-          </table>
-          </div>
-          </div>`,
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h1>Network Endpoints</h1>
+                <p>Inspect active TCP and UDP sockets across the host.</p>
+              </div>
+              <button class="btn" @click="updateData">Refresh</button>
+            </header>
+            <div v-if="!payload" class="empty-state">{{ data }}</div>
+            <div v-else class="panel-body two-col">
+              <article class="card">
+                <div class="card-header">
+                  <h2>TCP Connections</h2>
+                  <p>Sorted by local port</p>
+                </div>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Processes</th>
+                        <th>State</th>
+                        <th>Local</th>
+                        <th>Remote</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="tcp in sortedTcp"
+                        :key="tcp.local.address + ':' + tcp.local.port + tcp.state"
+                      >
+                        <td>{{ formatPids(tcp.pids) }}</td>
+                        <td>{{ tcp.state }}</td>
+                        <td>{{ tcp.local.address }}:{{ tcp.local.port }}</td>
+                        <td>{{ tcp.remote.address }}:{{ tcp.remote.port }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+              <article class="card">
+                <div class="card-header">
+                  <h2>UDP Listeners</h2>
+                  <p>Sorted by local port</p>
+                </div>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Processes</th>
+                        <th>Local</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="udp in sortedUdp"
+                        :key="udp.local.address + ':' + udp.local.port"
+                      >
+                        <td>{{ formatPids(udp.pids) }}</td>
+                        <td>{{ udp.local.address }}:{{ udp.local.port }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            </div>
+          </section>
+        `,
       });
 
       app.component("tab-system", {
@@ -163,150 +816,406 @@
             this.data = content;
             return;
           }
-
           this.updateData();
         },
-        methods: {
-          updateData: async function() {
-            this.data = "loading..";
-            this.data = await request("system");
-            cache["system"] = this.data;
-          },
-        },
-        data: function() {
+        data() {
           return {
-            data: "loading..",
+            data: "Loading...",
           };
         },
+        computed: {
+          payload() {
+            return typeof this.data === "string" ? null : this.data;
+          },
+          info() {
+            return this.payload && this.payload.info ? this.payload.info : {};
+          },
+          formattedTime() {
+            if (!this.payload || !this.payload.unix_time_seconds) {
+              return "N/A";
+            }
+            const date = new Date(this.payload.unix_time_seconds * 1000);
+            return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
+          },
+          temperatures() {
+            return this.payload && Array.isArray(this.payload.temperature)
+              ? this.payload.temperature
+              : [];
+          },
+          cpuList() {
+            if (!this.payload || !Array.isArray(this.payload.cpu)) {
+              return [];
+            }
+            return this.payload.cpu.map((cpu, index) => {
+              const usage = typeof cpu.usage === "number" ? cpu.usage : 0;
+              return {
+                key: cpu.name || `cpu-${index}`,
+                displayName: cpu.name || `CPU ${index}`,
+                brand: cpu.brand || cpu.name || `CPU ${index}`,
+                usage: usage,
+                usageDisplay: isNaN(usage) ? "0.0" : usage.toFixed(1),
+                ghz: cpu.frequency ? (Math.round(cpu.frequency) / 1000).toFixed(2) : null,
+              };
+            });
+          },
+          cpuBrand() {
+            return this.cpuList.length ? this.cpuList[0].brand : "N/A";
+          },
+          ram() {
+            return this.payload && this.payload.memory ? this.payload.memory.ram : null;
+          },
+          swap() {
+            return this.payload && this.payload.memory ? this.payload.memory.swap : null;
+          },
+          disks() {
+            if (!this.payload || !Array.isArray(this.payload.disk)) {
+              return [];
+            }
+            return this.payload.disk.map((disk) => {
+              const total = disk.total_space_B || 0;
+              const available = disk.available_space_B || 0;
+              const usagePercent = total ? ((total - available) / total) * 100 : null;
+              return Object.assign({}, disk, { usagePercent });
+            });
+          },
+          network() {
+            if (!this.payload || !Array.isArray(this.payload.network)) {
+              return [];
+            }
+            return this.payload.network.map((iface) => ({
+              name: iface.name || "Unknown",
+              description: iface.description || "",
+              ips: Array.isArray(iface.ips)
+                ? iface.ips.join(", ")
+                : iface.ips || "N/A",
+              mac: iface.mac || "N/A",
+              received_B: iface.received_B,
+              transmitted_B: iface.transmitted_B,
+              total_received_B: iface.total_received_B,
+              total_transmitted_B: iface.total_transmitted_B,
+              packets_received: iface.packets_received,
+              packets_transmitted: iface.packets_transmitted,
+              errors_on_received: iface.errors_on_received,
+              errors_on_transmitted: iface.errors_on_transmitted,
+            }));
+          },
+          processes() {
+            if (!this.payload || !Array.isArray(this.payload.process)) {
+              return [];
+            }
+            return [...this.payload.process]
+              .sort((a, b) => b.cpu_usage - a.cpu_usage)
+              .slice(0, 20);
+          },
+        },
+        methods: {
+          async updateData() {
+            this.data = "Loading...";
+            try {
+              const payload = await request("system");
+              this.data = payload;
+              cache["system"] = payload;
+            } catch (error) {
+              console.error(error);
+              this.data = "Unable to load data";
+            }
+          },
+          formatBytes(value) {
+            if (value === null || value === undefined || isNaN(value)) {
+              return "N/A";
+            }
+            let bytes = Math.max(0, value);
+            const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+            let index = 0;
+            while (bytes >= 1024 && index < units.length - 1) {
+              bytes /= 1024;
+              index += 1;
+            }
+            const formatted = index === 0 ? Math.round(bytes) : bytes.toFixed(2);
+            return `${formatted} ${units[index]}`;
+          },
+          formatPercent(value) {
+            if (value === null || value === undefined || isNaN(value)) {
+              return "N/A";
+            }
+            return `${value.toFixed(1)} %`;
+          },
+          memoryPercent(used, total) {
+            if (used === null || used === undefined || !total) {
+              return null;
+            }
+            return (used / total) * 100;
+          },
+          clampPercentage(value) {
+            if (value === null || value === undefined || isNaN(value)) {
+              return 0;
+            }
+            return Math.max(0, Math.min(value, 100));
+          },
+          formatCount(value) {
+            if (value === null || value === undefined || isNaN(value)) {
+              return "N/A";
+            }
+            return value;
+          },
+          formatCommand(process) {
+            if (process.command && process.command.length) {
+              return process.command.join(" ");
+            }
+            return process.name || "Unnamed process";
+          },
+          formatNumber(value, digits = 2) {
+            if (value === null || value === undefined || isNaN(value)) {
+              return "N/A";
+            }
+            return value.toFixed(digits);
+          },
+        },
         template: `
-          <button v-on:click="updateData()">Update</button>
-          <div v-if="data.info && data.temperature" style="display: flex; column-gap: 1em">
-            <div>
-              <h3>Info</h3>
-              Host name: {{data.info.host_name}}<br>
-              Kernel version: {{data.info.kernel_version}}<br>
-              OS version: {{data.info.os_version}}<br>
-              OS name: {{data.info.system_name}} {{data.info.system_name.includes("Arch") ? "(I use Arch BTW)" : ""}}<br>
-              Time: {{new Date(data.unix_time_seconds * 1000).toTimeString()}}<br>
-            </div>
-            <div>
-              <h3>Temperature</h3>
-              <div style="display: flex; column-gap: 1em">
-                <div v-for="sensor in data.temperature">
-                  <h4>{{sensor.name}}</h4>
-                  Temperature: {{sensor.temperature.toFixed(2)}} ºC<br>
-                  Maximum temp: {{sensor.maximum_temperature ? sensor.maximum_temperature.toFixed(2) + " ºC" : "Unknown"}}<br>
-                  Critical temp: {{sensor.critical_temperature ? sensor.critical_temperature.toFixed(2) + " ºC" : "Unknown"}}<br>
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h1>System Overview</h1>
+                <p>Snapshot of host identity, sensors, and runtime resource usage.</p>
+              </div>
+              <button class="btn" @click="updateData">Refresh</button>
+            </header>
+            <div v-if="!payload" class="empty-state">{{ data }}</div>
+            <div v-else class="panel-body">
+              <div class="metric-grid">
+                <div class="metric-card">
+                  <span class="metric-label">Host</span>
+                  <span class="metric-value">{{ info.host_name || "Unknown" }}</span>
+                  <span class="metric-sub">{{ info.system_name || "Unknown OS" }}
+                    <span v-if="info.os_version">| {{ info.os_version }}</span>
+                  </span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">Kernel</span>
+                  <span class="metric-value">{{ info.kernel_version || "N/A" }}</span>
+                  <span class="metric-sub">Snapshot captured at {{ formattedTime }}</span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">CPU</span>
+                  <span class="metric-value">{{ cpuBrand }}</span>
+                  <span class="metric-sub">{{ cpuList.length }} logical core{{ cpuList.length === 1 ? '' : 's' }}</span>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div style="display: flex; column-gap: 1em">
-            <div v-if="data.cpu">
-              <h3 v-if="data.cpu">CPU {{data.cpu[0].brand}}</h3>
-              <div v-for="cpu in data.cpu" style="display: flex; column-gap: 1em">
-                <div>
-                  {{cpu.name}}
+              <article class="card" v-if="temperatures.length">
+                <div class="card-header">
+                  <h2>Temperature Sensors</h2>
+                  <p>Live readings across available probes</p>
                 </div>
-                <div>
-                  {{(Math.round(cpu.frequency)/1000).toFixed(2)}}GHz
-                </div>
-                <div>
-                  {{Math.round(cpu.usage)}}%
-                </div>
-              </div>
-            </div>
-
-            <div v-if="data.memory">
-              <h3>Memory</h3>
-              <h4>RAM</h4>
-                Space (Used / Total | %): {{(data.memory.ram.used_kB / Math.pow(2, 10)).toFixed(2)}}MB / {{(data.memory.ram.total_kB / Math.pow(2, 10)).toFixed(2)}}MB | {{(100*data.memory.ram.used_kB/data.memory.ram.total_kB).toFixed(2)}}%<br>
-              <h4>Swap</h4>
-                Space (Used / Total | %): {{(data.memory.swap.used_kB / Math.pow(2, 10)).toFixed(2)}}MB / {{(data.memory.swap.total_kB / Math.pow(2, 10)).toFixed(2)}}MB | {{(100*data.memory.swap.used_kB/data.memory.swap.total_kB).toFixed(2)}}%<br>
-            </div>
-
-            <div v-if="data.disk">
-              <h3>Disks</h3>
-              <div v-for="disk in data.disk">
-                <h4>{{disk.name}}</h4>
-                Type: {{disk.type}}<br>
-                Mount point: {{disk.mount_point}}<br>
-                Filesystem: {{disk.filesystem_type}}<br>
-                Space (Free / Total | %): {{(disk.available_space_B / Math.pow(2, 30)).toFixed(2)}}GB / {{(disk.total_space_B / Math.pow(2, 30)).toFixed(2)}}GB | {{(100 - 100*disk.available_space_B/disk.total_space_B).toFixed(2)}}%<br>
-              </div>
-            </div>
-
-            <div v-if="data.network">
-              <h3>Network</h3>
-              <div style="display: flex; column-gap: 1em">
-                <div v-for="network in data.network">
-                  <h4>{{network.name}}</h4>
-                  Description: {{network.description ? network.description : "None"}}<br>
-                  IPs: {{network.ips}}<br>
-                  MAC: {{network.mac}}<br>
-                  <div v-for="what in ['received', 'transmitted']">
-                  <h5>{{what.charAt(0).toUpperCase() + what.slice(1)}}:</h5>
-                  Errors: {{network["errors_on_" + what]}}<br>
-                  Packets: {{network["packets_" + what]}}<br>
-                  {{what}}: {{Math.round(network[what + "_B"]/1024)}} kB<br>
-                  Total errors: {{network["total_errors_on_" + what]}}<br>
-                  Total packets: {{network["total_packets_" + what]}}<br>
-                  Total {{what}}: {{(Math.round(network["total_" + what + "_B"]/1024))}} kB<br>
+                <div class="sensor-grid">
+                  <div class="metric-card" v-for="sensor in temperatures" :key="sensor.name">
+                    <span class="metric-label">{{ sensor.name }}</span>
+                    <span class="metric-value">{{ sensor.temperature.toFixed(2) }} °C</span>
+                    <span class="metric-sub">
+                      Max: {{ sensor.maximum_temperature ? sensor.maximum_temperature.toFixed(2) + ' °C' : 'Unknown' }} |
+                      Crit: {{ sensor.critical_temperature ? sensor.critical_temperature.toFixed(2) + ' °C' : 'Unknown' }}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+              </article>
 
-          <table style="width:100%" v-if="data.process">
-            <tr>
-              <th>Name</th>
-              <th style="min-width: 9em">PID / Parent</th>
-              <th style="min-width: 5em">CPU (%)</th>
-              <th style="min-width: 5em">MEM (%)</th>
-              <th>Status</th>
-              <th>Command</th>
-            </tr>
-            <tr v-for="process in data.process.sort((a, b) => b.cpu_usage - a.cpu_usage)">
-              <td>{{process.name}}</td>
-              <td>{{process.pid}}{{process.parent_process ? " / " + process.parent_process : ""}}</td>
-              <td>{{process.cpu_usage.toFixed(2)}} %</td>
-              <td>{{(100*process.used_memory_kB/data.memory.ram.used_kB).toFixed(2)}} %</td>
-              <td>{{process.status}}</td>
-              <td>{{process.command.join(" ")}}</td>
-            </tr>
-          </table>`,
+              <article class="card" v-if="cpuList.length">
+                <div class="card-header">
+                  <h2>CPU Load</h2>
+                  <p>Usage across logical processors</p>
+                </div>
+                <div class="cpu-grid">
+                  <div class="cpu-row" v-for="(cpu, index) in cpuList" :key="cpu.key || index">
+                    <div class="cpu-row-header">
+                      <strong>{{ cpu.displayName }}</strong>
+                      <span class="metric-sub" v-if="cpu.ghz">| {{ cpu.ghz }} GHz</span>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar" :style="{ width: clampPercentage(parseFloat(cpu.usage)) + '%' }"></div>
+                    </div>
+                    <span class="metric-sub">{{ cpu.usageDisplay }} %</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card" v-if="ram">
+                <div class="card-header">
+                  <h2>Memory</h2>
+                  <p>RAM and swap allocations</p>
+                </div>
+                <div class="memory-section">
+                  <div>
+                    <div class="metric-label">RAM</div>
+                    <div class="metric-value">
+                      {{ formatBytes(ram.used_kB * 1024) }} / {{ formatBytes(ram.total_kB * 1024) }}
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar"
+                        :style="{ width: clampPercentage(memoryPercent(ram.used_kB, ram.total_kB)) + '%' }"
+                      ></div>
+                    </div>
+                    <div class="metric-sub">{{ formatPercent(memoryPercent(ram.used_kB, ram.total_kB)) }}</div>
+                  </div>
+                  <div v-if="swap && swap.total_kB">
+                    <div class="metric-label">Swap</div>
+                    <div class="metric-value">
+                      {{ formatBytes(swap.used_kB * 1024) }} / {{ formatBytes(swap.total_kB * 1024) }}
+                    </div>
+                    <div class="progress">
+                      <div
+                        class="progress-bar"
+                        :style="{ width: clampPercentage(memoryPercent(swap.used_kB, swap.total_kB)) + '%' }"
+                      ></div>
+                    </div>
+                    <div class="metric-sub">{{ formatPercent(memoryPercent(swap.used_kB, swap.total_kB)) }}</div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card" v-if="disks.length">
+                <div class="card-header">
+                  <h2>Storage</h2>
+                  <p>Mounted volumes and free capacity</p>
+                </div>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Disk</th>
+                        <th>Mount</th>
+                        <th>Filesystem</th>
+                        <th>Usage</th>
+                        <th>Free / Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="disk in disks" :key="disk.name + disk.mount_point">
+                        <td>{{ disk.name }} <span class="metric-sub">({{ disk.type }})</span></td>
+                        <td>{{ disk.mount_point }}</td>
+                        <td>{{ disk.filesystem_type }}</td>
+                        <td>{{ formatPercent(disk.usagePercent) }}</td>
+                        <td>{{ formatBytes(disk.available_space_B) }} / {{ formatBytes(disk.total_space_B) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+
+              <article class="card" v-if="network.length">
+                <div class="card-header">
+                  <h2>Network Interfaces</h2>
+                  <p>Per-interface traffic counters</p>
+                </div>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Interface</th>
+                        <th>Addresses</th>
+                        <th>MAC</th>
+                        <th>Received</th>
+                        <th>Transmitted</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="iface in network" :key="iface.name">
+                        <td>
+                          {{ iface.name }}
+                          <span class="metric-sub" v-if="iface.description">| {{ iface.description }}</span>
+                        </td>
+                        <td>{{ iface.ips }}</td>
+                        <td>{{ iface.mac }}</td>
+                        <td>
+                          <div>{{ formatBytes(iface.received_B) }} / {{ formatBytes(iface.total_received_B) }} total</div>
+                          <div class="metric-sub">
+                            Packets {{ formatCount(iface.packets_received) }} | Errors {{ formatCount(iface.errors_on_received) }}
+                          </div>
+                        </td>
+                        <td>
+                          <div>{{ formatBytes(iface.transmitted_B) }} / {{ formatBytes(iface.total_transmitted_B) }} total</div>
+                          <div class="metric-sub">
+                            Packets {{ formatCount(iface.packets_transmitted) }} | Errors {{ formatCount(iface.errors_on_transmitted) }}
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+
+              <article class="card" v-if="processes.length">
+                <div class="card-header">
+                  <h2>Top Processes</h2>
+                  <p>Sorted by CPU usage (top 20)</p>
+                </div>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Command</th>
+                        <th>PID</th>
+                        <th>CPU</th>
+                        <th>Memory</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="process in processes" :key="process.pid">
+                        <td>{{ formatCommand(process) }}</td>
+                        <td>
+                          {{ process.pid }}
+                          <span class="metric-sub" v-if="process.parent_process">/ {{ process.parent_process }}</span>
+                        </td>
+                        <td>{{ formatNumber(process.cpu_usage) }} %</td>
+                        <td>{{ formatPercent(memoryPercent(process.used_memory_kB, ram ? ram.total_kB : null)) }}</td>
+                        <td>{{ process.status }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            </div>
+          </section>
+        `,
       });
 
       app.component("tab-udev-tree", {
         props: ["item"],
-        methods: {
-          toggle: function() {
-            this.open = !this.open;
-          },
-        },
-        computed: {
-          pretty_json: function() {
-            const item = Object.assign({}, this.item);
-            delete item["parent"];
-            return JSON.stringify(item, undefined, 2);
-          },
-        },
-        data: function() {
+        data() {
           return {
             open: false,
           };
         },
+        computed: {
+          pretty_json() {
+            const copy = Object.assign({}, this.item);
+            delete copy.parent;
+            return JSON.stringify(copy, null, 2);
+          },
+        },
+        methods: {
+          toggle() {
+            this.open = !this.open;
+          },
+        },
         template: `
-          <ul>
-            <a @click="toggle()">
-              <span class="toggle" span>{{open ? "☟" : "☞"}}</span> {{item.system_path}}
-            </a>
-            <pre v-if="item && item.system_path && open">{{pretty_json}}</pre>
-            <tab-udev-tree v-if="item.parent" :item="item.parent"/>
-          </ul>
-          `,
+          <li class="udev-node">
+            <button class="udev-toggle" type="button" @click="toggle">
+              <span class="chevron">{{ open ? 'v' : '>' }}</span>
+              <code>{{ item.system_path || item.syspath || 'Unknown path' }}</code>
+            </button>
+            <div v-if="open" class="udev-details">
+              <pre>{{ pretty_json }}</pre>
+            </div>
+            <ul v-if="item.parent" class="udev-children">
+              <tab-udev-tree
+                :item="item.parent"
+                :key="item.parent.system_path || item.parent.syspath"
+              ></tab-udev-tree>
+            </ul>
+          </li>
+        `,
       });
 
       app.component("tab-udev", {
@@ -316,79 +1225,178 @@
             this.data = content;
             return;
           }
-
           this.updateData();
         },
-        methods: {
-          updateData: async function() {
-            this.data = "loading..";
-            this.data = await request("udev");
-            cache["udev"] = this.data;
-          },
-        },
-        data: function() {
+        data() {
           return {
-            data: "loading..",
+            data: "Loading...",
           };
         },
+        computed: {
+          payload() {
+            return typeof this.data === "string" ? null : this.data;
+          },
+        },
+        methods: {
+          async updateData() {
+            this.data = "Loading...";
+            try {
+              const payload = await request("udev");
+              this.data = payload;
+              cache["udev"] = payload;
+            } catch (error) {
+              console.error(error);
+              this.data = "Unable to load data";
+            }
+          },
+        },
         template: `
-          <button v-on:click="updateData()">Update</button>
-          <tab-udev-tree v-for="item in data" :item="item"/>
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h1>Device Tree</h1>
+                <p>Explore udev-reported devices and their parent chain.</p>
+              </div>
+              <button class="btn" @click="updateData">Refresh</button>
+            </header>
+            <div v-if="!payload" class="empty-state">{{ data }}</div>
+            <div v-else class="card">
+              <ul class="udev-tree">
+                <tab-udev-tree
+                  v-for="item in payload"
+                  :key="item.system_path || item.syspath"
+                  :item="item"
+                ></tab-udev-tree>
+              </ul>
+            </div>
+          </section>
         `,
       });
 
       app.component("tab-kernel", {
         created() {
-          const content = cache["kernel"];
-          if (content) {
-            this.data = content;
-            return;
-          }
-
           this.initWebsocket();
         },
-        methods: {
-          initWebsocket: async function() {
-            const websocketUrl = new URL('ws/kernel_buffer', window.location.href);
-            websocketUrl.protocol = websocketUrl.protocol.replace('http', 'ws');
-            this.socket = new WebSocket(websocketUrl.href);
-            this.socket.onmessage = (message) => {
-              this.data = this.data.concat(JSON.parse(message.data));
-              var element = document.getElementById("dmesg-output");
-              element.scrollTop = element.scrollHeight;
-            };
-          },
-          levelToColor: function(level) {
-            const level_color = {
-              emerg: "Crimson",
-              alert: "DarkOrange",
-              crit: "DarkRed",
-              err: "red",
-              warn: "OrangeRed",
-              notice: "DarkMagenta",
-              info: "DarkGray",
-              debug: "DarkGreen",
-            };
-
-            if (level_color[level]) {
-              return level_color[level];
-            }
-
-            return "black";
-          },
+        beforeUnmount() {
+          if (this.socket) {
+            this.socket.close();
+          }
         },
-        data: function() {
+        data() {
           return {
-            socket: undefined,
+            socket: null,
             data: [],
+            status: "connecting",
           };
         },
+        computed: {
+          statusClass() {
+            if (this.status === "online") {
+              return "online";
+            }
+            if (this.status === "offline") {
+              return "offline";
+            }
+            return "";
+          },
+          statusText() {
+            if (this.status === "online") {
+              return "Online";
+            }
+            if (this.status === "offline") {
+              return "Offline";
+            }
+            return "Connecting";
+          },
+        },
+        methods: {
+          initWebsocket() {
+            try {
+              const websocketUrl = new URL("ws/kernel_buffer", window.location.href);
+              websocketUrl.protocol = websocketUrl.protocol.replace("http", "ws");
+              this.socket = new WebSocket(websocketUrl.href);
+              this.socket.onopen = () => {
+                this.status = "online";
+              };
+              this.socket.onclose = () => {
+                this.status = "offline";
+              };
+              this.socket.onerror = () => {
+                this.status = "offline";
+              };
+              this.socket.onmessage = (message) => {
+                try {
+                  const payload = JSON.parse(message.data);
+                  if (Array.isArray(payload)) {
+                    this.data = this.data.concat(payload);
+                  }
+                  this.$nextTick(() => {
+                    const element = document.getElementById("dmesg-output");
+                    if (element) {
+                      element.scrollTop = element.scrollHeight;
+                    }
+                  });
+                } catch (error) {
+                  console.error("Failed to parse kernel message", error);
+                }
+              };
+            } catch (error) {
+              console.error("Websocket initialization error", error);
+              this.status = "offline";
+            }
+          },
+          clearLog() {
+            this.data = [];
+          },
+          levelToColor(level) {
+            const levelColor = {
+              emerg: "#ef4444",
+              alert: "#f97316",
+              crit: "#ef4444",
+              err: "#f87171",
+              warn: "#facc15",
+              notice: "#38bdf8",
+              info: "#cbd5f5",
+              debug: "#34d399",
+            };
+            return levelColor[level] || "#e2e8f0";
+          },
+          formatTimestamp(ns) {
+            if (!ns && ns !== 0) {
+              return "0.000000";
+            }
+            return (ns / 1e9).toFixed(6);
+          },
+        },
         template: `
-          <button v-on:click="updateData()">Update</button>
-          <div id="dmesg-output" style="margin-top: 0.7em; max-height:50em; overflow:auto; border:1px solid black;">
-            <pre v-for="entry in data" class="dmesg" v-bind:style="{ color: levelToColor(entry.level)}">{{entry.sequence_number}} [{{entry.facility}}] ({{(entry.timestamp_from_system_start_ns/1e9).toFixed(6)}})> {{entry.message}}</pre>
-          </div>
-          `,
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h1>Kernel Messages</h1>
+                <p>Live feed mirrored from dmesg via websocket.</p>
+              </div>
+              <div class="header-actions">
+                <span :class="['status-badge', statusClass]">
+                  <span class="status-dot"></span>{{ statusText }}
+                </span>
+                <button class="btn secondary" @click="clearLog">Clear log</button>
+              </div>
+            </header>
+            <div class="card log-card">
+              <div id="dmesg-output" class="log-stream">
+                <p v-if="!data.length" class="log-placeholder">Waiting for kernel events...</p>
+                <pre
+                  v-for="entry in data"
+                  :key="entry.sequence_number + '-' + entry.timestamp_from_system_start_ns"
+                  class="log-line"
+                  :style="{ color: levelToColor(entry.level) }"
+                >
+{{ entry.sequence_number }} [{{ entry.facility }}] ({{ formatTimestamp(entry.timestamp_from_system_start_ns) }}) > {{ entry.message }}
+                </pre>
+              </div>
+            </div>
+          </section>
+        `,
       });
 
       app.component("tab-platform", {
@@ -398,38 +1406,126 @@
             this.data = content;
             return;
           }
-
           this.updateData();
         },
-        methods: {
-          updateData: async function() {
-            this.data = "loading..";
-            this.data = await request("platform");
-            cache["platform"] = this.data;
-          },
-        },
-        data: function() {
+        data() {
           return {
-            data: "loading..",
+            data: "Loading...",
           };
         },
+        computed: {
+          payload() {
+            return typeof this.data === "string" ? null : this.data;
+          },
+          raspberry() {
+            return this.payload && this.payload.raspberry ? this.payload.raspberry : null;
+          },
+          occurringEvents() {
+            if (!this.raspberry || !this.raspberry.events) {
+              return [];
+            }
+            return Array.isArray(this.raspberry.events.occurring)
+              ? this.raspberry.events.occurring
+              : [];
+          },
+          sortedHistory() {
+            if (!this.raspberry || !this.raspberry.events || !Array.isArray(this.raspberry.events.list)) {
+              return [];
+            }
+            return [...this.raspberry.events.list].sort((a, b) => {
+              const aTime = new Date(a.time).getTime();
+              const bTime = new Date(b.time).getTime();
+              return bTime - aTime;
+            });
+          },
+          errorMessage() {
+            return this.payload && this.payload.Err ? this.payload.Err : null;
+          },
+        },
+        methods: {
+          async updateData() {
+            this.data = "Loading...";
+            try {
+              const payload = await request("platform");
+              this.data = payload;
+              cache["platform"] = payload;
+            } catch (error) {
+              console.error(error);
+              this.data = "Unable to load data";
+            }
+          },
+          formatEventLabel(type) {
+            if (!type) {
+              return "Unknown";
+            }
+            return type
+              .split("_")
+              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+              .join(" ");
+          },
+          formatTimestampLabel(value) {
+            if (!value) {
+              return "Unknown time";
+            }
+            const date = new Date(value);
+            return isNaN(date.getTime()) ? value : date.toLocaleString();
+          },
+        },
         template: `
-          <button v-on:click="updateData()">Update</button>
-          <div v-if="data.raspberry">
-            <h4>Info</h4>
-            <div>Model: {{data.raspberry.model}}</div>
-            <div>SOC: {{data.raspberry.soc}}</div>
-            <h4>Occurring</h4>
-            {{data.raspberry.events.occurring.map(event => event.type)}}
-            <h4>Last events</h4>
-            <div v-for="event in data.raspberry.events.list.sort().reverse()">
-              {{event.time}}: {{event.type}}
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h1>Platform Signals</h1>
+                <p>Board specific telemetry for Raspberry Pi deployments.</p>
+              </div>
+              <button class="btn" @click="updateData">Refresh</button>
+            </header>
+            <div v-if="errorMessage" class="empty-state error">{{ errorMessage }}</div>
+            <div v-else-if="!raspberry" class="empty-state">Platform data unavailable for this host.</div>
+            <div v-else class="panel-body">
+              <div class="metric-grid">
+                <div class="metric-card">
+                  <span class="metric-label">Model</span>
+                  <span class="metric-value">{{ raspberry.model }}</span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-label">SoC</span>
+                  <span class="metric-value">{{ raspberry.soc }}</span>
+                </div>
+                <div class="metric-card" v-if="raspberry.serial">
+                  <span class="metric-label">Serial</span>
+                  <span class="metric-value">{{ raspberry.serial }}</span>
+                </div>
+              </div>
+
+              <article class="card" v-if="occurringEvents.length">
+                <div class="card-header">
+                  <h2>Active Events</h2>
+                  <p>Currently flagged throttle or voltage issues</p>
+                </div>
+                <div class="badge-list">
+                  <span class="badge" v-for="event in occurringEvents" :key="event.type">
+                    {{ formatEventLabel(event.type) }}
+                  </span>
+                </div>
+              </article>
+
+              <article class="card">
+                <div class="card-header">
+                  <h2>Recent History</h2>
+                  <p>Most recent platform signals</p>
+                </div>
+                <div v-if="sortedHistory.length" class="timeline">
+                  <div class="timeline-entry" v-for="event in sortedHistory" :key="event.time + event.type">
+                    <span class="timeline-time">{{ formatTimestampLabel(event.time) }}</span>
+                    <span class="timeline-label">{{ formatEventLabel(event.type) }}</span>
+                  </div>
+                </div>
+                <div v-else class="metric-sub">No historical events recorded.</div>
+              </article>
             </div>
-          </div>
-          <div v-else-if="data.Err">
-            <h4>Error:</h4>
-            <div>{{data.Err}}</div>
-          </div>`,
+          </section>
+        `,
       });
 
       app.mount("#app");
