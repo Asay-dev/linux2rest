@@ -391,6 +391,50 @@
         border-bottom: none;
       }
 
+      .journal-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .journal-entry {
+        background: rgba(8, 12, 24, 0.92);
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        padding: 0.95rem 1.1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+
+      .journal-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      .journal-message {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        white-space: pre-wrap;
+      }
+
+      .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+      }
+
       .status-badge {
         display: inline-flex;
         align-items: center;
@@ -674,7 +718,7 @@
       const app = Vue.createApp({
         data() {
           return {
-            tabs: ["netstat", "system", "udev", "kernel", "platform"],
+            tabs: ["netstat", "system", "journal", "kernel", "udev", "platform"],
             current_tab: "system",
           };
         },
@@ -1268,6 +1312,200 @@
                   :item="item"
                 ></tab-udev-tree>
               </ul>
+            </div>
+          </section>
+        `,
+      });
+
+      app.component("tab-journal", {
+        created() {
+          this.fetchEntries();
+          this.initWebsocket();
+        },
+        beforeUnmount() {
+          if (this.socket) {
+            this.socket.close();
+          }
+        },
+        data() {
+          return {
+            entries: [],
+            socket: null,
+            status: "connecting",
+            error: null,
+            loading: true,
+          };
+        },
+        computed: {
+          statusClass() {
+            if (this.status === "online") {
+              return "online";
+            }
+            if (this.status === "offline") {
+              return "offline";
+            }
+            return "";
+          },
+          statusText() {
+            if (this.status === "online") {
+              return "Online";
+            }
+            if (this.status === "offline") {
+              return "Offline";
+            }
+            return "Connecting";
+          },
+          hasEntries() {
+            return this.entries.length > 0;
+          },
+        },
+        methods: {
+          async fetchEntries() {
+            this.loading = true;
+            this.entries = [];
+            try {
+              const payload = await request("journal");
+              this.applyPayload(payload);
+            } catch (error) {
+              console.error(error);
+              this.error = "Unable to load journal";
+            } finally {
+              this.loading = false;
+            }
+          },
+          initWebsocket() {
+            try {
+              const websocketUrl = new URL("ws/journal", window.location.href);
+              websocketUrl.protocol = websocketUrl.protocol.replace("http", "ws");
+              this.socket = new WebSocket(websocketUrl.href);
+              this.socket.onopen = () => {
+                this.status = "online";
+              };
+              this.socket.onclose = () => {
+                this.status = "offline";
+              };
+              this.socket.onerror = () => {
+                this.status = "offline";
+              };
+              this.socket.onmessage = (message) => {
+                try {
+                  const payload = JSON.parse(message.data);
+                  this.applyPayload(payload);
+                } catch (error) {
+                  console.error("Failed to parse journal payload", error);
+                }
+              };
+            } catch (error) {
+              console.error("Journal websocket initialization error", error);
+              this.status = "offline";
+            }
+          },
+          applyPayload(payload) {
+            if (!payload || typeof payload !== "object") {
+              return;
+            }
+
+            if (payload.error) {
+              this.error = payload.error;
+            } else {
+              this.error = null;
+            }
+
+            if (Array.isArray(payload.entries) && payload.entries.length) {
+              this.entries = this.entries.concat(payload.entries);
+              if (this.entries.length > 500) {
+                this.entries = this.entries.slice(this.entries.length - 500);
+              }
+            }
+
+            this.loading = false;
+          },
+          clearLog() {
+            this.entries = [];
+          },
+          priorityLabel(priority) {
+            const labels = {
+              0: "Emergency",
+              1: "Alert",
+              2: "Critical",
+              3: "Error",
+              4: "Warning",
+              5: "Notice",
+              6: "Info",
+              7: "Debug",
+            };
+            if (priority === null || priority === undefined) {
+              return "Info";
+            }
+            return labels[priority] || labels[6];
+          },
+          priorityStyle(priority) {
+            const palette = {
+              0: { color: "#f87171", background: "rgba(248, 113, 113, 0.18)", border: "rgba(248, 113, 113, 0.45)" },
+              1: { color: "#fb923c", background: "rgba(251, 146, 60, 0.2)", border: "rgba(251, 146, 60, 0.45)" },
+              2: { color: "#fb7185", background: "rgba(249, 168, 212, 0.16)", border: "rgba(236, 72, 153, 0.4)" },
+              3: { color: "#f97316", background: "rgba(249, 115, 22, 0.18)", border: "rgba(249, 115, 22, 0.45)" },
+              4: { color: "#facc15", background: "rgba(250, 204, 21, 0.16)", border: "rgba(250, 204, 21, 0.4)" },
+              5: { color: "#38bdf8", background: "rgba(56, 189, 248, 0.18)", border: "rgba(56, 189, 248, 0.4)" },
+              6: { color: "#cbd5f5", background: "rgba(148, 163, 184, 0.18)", border: "rgba(148, 163, 184, 0.35)" },
+              7: { color: "#34d399", background: "rgba(52, 211, 153, 0.18)", border: "rgba(52, 211, 153, 0.35)" },
+            };
+
+            const style = palette[priority ?? 6] || palette[6];
+            return {
+              color: style.color,
+              background: style.background,
+              borderColor: style.border,
+            };
+          },
+          formatTimestamp(value) {
+            if (!value) {
+              return "Unknown time";
+            }
+            const date = new Date(value);
+            return isNaN(date.getTime()) ? value : date.toLocaleString();
+          },
+        },
+        template: `
+          <section class="panel">
+            <header class="panel-header">
+              <div>
+                <h1>System Journal</h1>
+                <p>Live view of systemd journal entries similar to journalctl.</p>
+              </div>
+              <div class="header-actions">
+                <span :class="['status-badge', statusClass]">
+                  <span class="status-dot"></span>{{ statusText }}
+                </span>
+                <button class="btn secondary" @click="fetchEntries">Refresh</button>
+                <button class="btn secondary" @click="clearLog">Clear view</button>
+              </div>
+            </header>
+            <div class="card log-card">
+              <div class="log-stream">
+                <p v-if="loading" class="log-placeholder">Loading journal...</p>
+                <p v-else-if="error" class="log-placeholder">{{ error }}</p>
+                <p v-else-if="!hasEntries" class="log-placeholder">No journal entries captured yet.</p>
+                <div v-else class="journal-list">
+                  <div
+                    v-for="entry in entries"
+                    :key="entry.cursor || entry.timestamp + entry.message"
+                    class="journal-entry"
+                  >
+                    <div class="journal-meta">
+                      <span>{{ formatTimestamp(entry.timestamp) }}</span>
+                      <span class="priority-badge" :style="priorityStyle(entry.priority)">
+                        {{ priorityLabel(entry.priority) }}
+                      </span>
+                      <span v-if="entry.identifier" class="metric-sub">{{ entry.identifier }}</span>
+                      <span v-if="entry.unit" class="metric-sub">{{ entry.unit }}</span>
+                      <span v-if="entry.pid" class="metric-sub">PID {{ entry.pid }}</span>
+                      <span v-if="entry.hostname" class="metric-sub">{{ entry.hostname }}</span>
+                    </div>
+                    <div class="journal-message">{{ entry.message }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         `,
