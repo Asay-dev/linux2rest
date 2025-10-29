@@ -1,3 +1,5 @@
+pub mod journal;
+pub mod journal_websocket;
 pub mod kernel;
 pub mod kernel_websocket;
 pub mod model;

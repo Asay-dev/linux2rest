@@ -44,6 +44,12 @@ pub struct KernelBufferQuery {
     size: Option<usize>,
 }
 
+#[derive(Deserialize, Apiv2Schema)]
+pub struct JournalQuery {
+    start: Option<usize>,
+    size: Option<usize>,
+}
+
 #[api_v2_operation]
 /// Provides kernel information, like dmesg
 pub fn kernel_buffer(
@@ -55,6 +61,18 @@ pub fn kernel_buffer(
     let query = query.into_inner();
 
     Json(features::kernel::messages(query.start, query.size))
+}
+
+#[api_v2_operation]
+/// Provides systemd journal output similar to journalctl -o json
+pub fn journal(
+    req: HttpRequest,
+    query: web::Query<JournalQuery>,
+) -> Json<features::journal::JournalResponse> {
+    debug!("{:#?}", req);
+
+    let query = query.into_inner();
+    Json(features::journal::entries(query.start, query.size))
 }
 
 #[api_v2_operation]
@@ -203,6 +221,16 @@ pub fn websocket_kernel_buffer(req: HttpRequest, stream: web::Payload) -> HttpRe
         stream,
     )
     .unwrap_or_else(|error| {
+        HttpResponse::BadRequest()
+            .content_type("text/plain")
+            .body(format!("error: {:#?}", error))
+    })
+}
+
+pub fn websocket_journal(req: HttpRequest, stream: web::Payload) -> HttpResponse {
+    debug!("{:#?}", req);
+
+    ws::start(features::journal_websocket::new_websocket(), &req, stream).unwrap_or_else(|error| {
         HttpResponse::BadRequest()
             .content_type("text/plain")
             .body(format!("error: {:#?}", error))

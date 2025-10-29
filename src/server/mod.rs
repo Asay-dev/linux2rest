@@ -22,6 +22,7 @@ pub fn run(server_address: &str) {
                 web::get().to(pages::root),
             )
             .route("/kernel_buffer", web::get().to(pages::kernel_buffer))
+            .route("/journal", web::get().to(pages::journal))
             .route("/model", web::get().to(pages::model))
             .route("/netstat", web::get().to(pages::netstat))
             .route("/platform", web::get().to(pages::platform))
@@ -46,6 +47,7 @@ pub fn run(server_address: &str) {
                 "/ws/kernel_buffer",
                 web::get().to(pages::websocket_kernel_buffer),
             )
+            .route("/ws/journal", web::get().to(pages::websocket_journal))
             .build()
     })
     .bind(server_address)
