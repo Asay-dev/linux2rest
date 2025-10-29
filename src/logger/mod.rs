@@ -34,8 +34,7 @@ pub fn init() {
         .with_thread_names(true)
         .with_filter(console_env_filter);
 
-    let subscriber = tracing_subscriber::registry()
-        .with(console_layer);
+    let subscriber = tracing_subscriber::registry().with(console_layer);
     tracing::subscriber::set_global_default(subscriber).expect("Unable to set a global subscriber");
 
     info!(
