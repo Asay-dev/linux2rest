@@ -1,8 +1,9 @@
 use crate::cli;
 use crate::features;
+use crate::zenoh as zenoh_mod;
 
 use serde::Serialize;
-use sinais::{Signal, SignalNoClone, _spawn};
+use sinais::_spawn;
 use tokio::time::{sleep, Duration};
 use tracing::*;
 
@@ -19,51 +20,69 @@ pub fn start() {
 
     _spawn(module_path!().into(), async move {
         let mut counter: u64 = 0;
+
+        let zenoh_topic_name = "system_information/{}";
         loop {
+            sleep(Duration::from_secs(1)).await;
+
+            let Some(zenoh_session) = zenoh_mod::get() else {
+                error!("Zenoh session not found");
+                continue;
+            };
+
             for (category, interval) in categories.iter() {
                 if counter % interval != 0 {
                     continue;
                 }
 
-                match category {
+                let topic_name =
+                    zenoh_topic_name.replace("{}", &category.to_string().replace("-", "_"));
+                let data = match category {
                     cli::LogSetting::Netstat => {
-                        print(category, features::netstat::netstat());
+                        serde_json::to_string(&features::netstat::netstat()).unwrap()
                     }
                     cli::LogSetting::Platform => {
-                        print(category, features::platform::platform());
+                        serde_json::to_string(&features::platform::platform()).unwrap()
                     }
                     cli::LogSetting::SerialPorts => {
-                        print(category, features::serial::serial(None));
+                        serde_json::to_string(&features::serial::serial(None)).unwrap()
                     }
-                    cli::LogSetting::SystemCpu => {
-                        print(category, features::system::cpu());
+                    cli::LogSetting::Cpu => {
+                        serde_json::to_string(&features::system::cpu()).unwrap()
                     }
-                    cli::LogSetting::SystemDisk => {
-                        print(category, features::system::disk());
+                    cli::LogSetting::Disk => {
+                        serde_json::to_string(&features::system::disk()).unwrap()
                     }
-                    cli::LogSetting::SystemInfo => {
-                        print(category, features::system::info());
+                    cli::LogSetting::Info => {
+                        serde_json::to_string(&features::system::info()).unwrap()
                     }
-                    cli::LogSetting::SystemMemory => {
-                        print(category, features::system::memory());
+                    cli::LogSetting::Memory => {
+                        serde_json::to_string(&features::system::memory()).unwrap()
                     }
-                    cli::LogSetting::SystemNetwork => {
-                        print(category, features::system::network());
+                    cli::LogSetting::Network => {
+                        serde_json::to_string(&features::system::network()).unwrap()
                     }
-                    cli::LogSetting::SystemProcess => {
-                        print(category, features::system::process());
+                    cli::LogSetting::Process => {
+                        serde_json::to_string(&features::system::process()).unwrap()
                     }
-                    cli::LogSetting::SystemTemperature => {
-                        print(category, features::system::temperature());
+                    cli::LogSetting::Temperature => {
+                        serde_json::to_string(&features::system::temperature()).unwrap()
                     }
-                    cli::LogSetting::SystemUnixTimeSeconds => {
-                        print(category, features::system::unix_time_seconds());
+                    cli::LogSetting::UnixTimeSeconds => {
+                        serde_json::to_string(&features::system::unix_time_seconds()).unwrap()
                     }
-                }
+                };
+
+                info!("Sending data to zenoh: {topic_name}: {data}");
+
+                zenoh_session
+                    .put(topic_name, data)
+                    .encoding(zenoh::bytes::Encoding::APPLICATION_JSON)
+                    .await
+                    .unwrap();
             }
 
             counter += 1;
-            sleep(Duration::from_secs(1)).await;
         }
     });
 }

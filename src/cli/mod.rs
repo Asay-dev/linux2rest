@@ -10,14 +10,14 @@ pub enum LogSetting {
     Netstat,
     Platform,
     SerialPorts,
-    SystemCpu,
-    SystemDisk,
-    SystemInfo,
-    SystemMemory,
-    SystemNetwork,
-    SystemProcess,
-    SystemTemperature,
-    SystemUnixTimeSeconds,
+    Cpu,
+    Disk,
+    Info,
+    Memory,
+    Network,
+    Process,
+    Temperature,
+    UnixTimeSeconds,
 }
 
 #[derive(Debug, StructOpt)]
@@ -40,6 +40,10 @@ pub struct Arguments {
     /// Valid keys are: netstat, platform, serial-ports, system-cpu, system-disk, system-info, system-memory, system-network, system-process, system-temperature, system-unix-time-seconds
     #[structopt(long, parse(try_from_str = parse_log_settings), default_value="")]
     pub log_settings: HashMap<LogSetting, u64>,
+
+    /// Sets the zenoh configuration file path.
+    #[structopt(long, value_name = "PATH")]
+    pub zenoh_config_file: Option<String>,
 }
 
 lazy_static! {
@@ -87,25 +91,25 @@ fn parse_log_settings(s: &str) -> Result<HashMap<LogSetting, u64>> {
 
 fn validate_interval(key: &LogSetting, val: u64) -> Result<()> {
     match key {
-        LogSetting::SystemUnixTimeSeconds if val < 1 => Err(anyhow!(
+        LogSetting::UnixTimeSeconds if val < 1 => Err(anyhow!(
             "Interval for '{key:?}' must not be less than 1 second."
         )),
-        LogSetting::SystemTemperature | LogSetting::Platform if val < 5 => Err(anyhow!(
+        LogSetting::Temperature | LogSetting::Platform if val < 5 => Err(anyhow!(
             "Interval for '{key:?}' must not be less than 5 seconds."
         )),
-        LogSetting::SystemProcess
+        LogSetting::Process
         | LogSetting::Netstat
         | LogSetting::SerialPorts
-        | LogSetting::SystemCpu
-        | LogSetting::SystemMemory
-        | LogSetting::SystemNetwork
+        | LogSetting::Cpu
+        | LogSetting::Memory
+        | LogSetting::Network
             if val < 10 =>
         {
             Err(anyhow!(
                 "Interval for '{key:?}' must not be less than 10 seconds."
             ))
         }
-        LogSetting::SystemDisk if val < 30 => Err(anyhow!(
+        LogSetting::Disk if val < 30 => Err(anyhow!(
             "Interval for '{key:?}' must not be less than 30 seconds."
         )),
         _ => Ok(()),
