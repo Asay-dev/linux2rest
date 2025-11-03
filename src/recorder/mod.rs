@@ -18,6 +18,9 @@ pub fn start() {
         return;
     }
 
+    let mut kernel_client = features::kernel::ask_for_client();
+    let mut journal_client = features::journal::ask_for_client();
+
     _spawn(module_path!().into(), async move {
         let mut counter: u64 = 0;
 
@@ -29,6 +32,24 @@ pub fn start() {
                 error!("Zenoh session not found");
                 continue;
             };
+
+            while let Ok(Some(message)) = kernel_client.try_next() {
+                info!("Sending kernel message to zenoh: {message}");
+                zenoh_session
+                    .put(zenoh_topic_name.replace("{}", "kernel"), message)
+                    .encoding(zenoh::bytes::Encoding::APPLICATION_JSON)
+                    .await
+                    .unwrap();
+            }
+
+            while let Ok(Some(message)) = journal_client.try_next() {
+                info!("Sending journal message to zenoh: {message}");
+                zenoh_session
+                    .put(zenoh_topic_name.replace("{}", "journal"), message)
+                    .encoding(zenoh::bytes::Encoding::APPLICATION_JSON)
+                    .await
+                    .unwrap();
+            }
 
             for (category, interval) in categories.iter() {
                 if counter % interval != 0 {
