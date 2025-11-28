@@ -3,6 +3,7 @@ use paperclip::actix::Apiv2Schema;
 use serde::Serialize;
 use std::fs;
 use std::process::Command;
+use lazy_static::lazy_static;
 
 #[cfg(feature = "raspberry")]
 mod raspberry;
@@ -136,6 +137,10 @@ impl GenericPlatform {
     }
 }
 
+lazy_static! {
+    static ref GENERIC_PLATFORM: GenericPlatform = GenericPlatform::new();
+}
+
 #[cfg(feature = "raspberry")]
 #[derive(Debug, Clone, Serialize, Apiv2Schema)]
 pub struct Raspberry {
@@ -176,13 +181,13 @@ pub fn platform() -> Result<Platform, String> {
 
         return Ok(Platform {
             raspberry: raspberry_info,
-            generic: GenericPlatform::new(),
+            generic: GENERIC_PLATFORM.clone(),
         });
     }
 
     #[cfg(not(feature = "raspberry"))]
     Ok(Platform {
-        generic: GenericPlatform::new(),
+        generic: GENERIC_PLATFORM.clone(),
     })
 }
 
