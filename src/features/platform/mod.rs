@@ -122,7 +122,6 @@ impl GenericPlatform {
     }
 
     fn get_os_name() -> String {
-        // Try /etc/os-release
         if let Ok(content) = fs::read_to_string("/etc/os-release") {
             for line in content.lines() {
                 if line.starts_with("PRETTY_NAME=") {
@@ -156,7 +155,7 @@ pub struct Platform {
 #[cfg(not(feature = "raspberry"))]
 #[derive(Debug, Clone, Serialize, Apiv2Schema)]
 pub struct Platform {
-    generic: GenericPlatform,
+    pub generic: GenericPlatform,
 }
 
 #[cached(time = 5)]
@@ -165,7 +164,6 @@ pub fn platform() -> Result<Platform, String> {
     {
         use rppal;
         
-        // Try to detect Raspberry Pi, but don't fail if not found
         let raspberry_info = match rppal::system::DeviceInfo::new() {
             Ok(system) => Some(Raspberry {
                 model: system.model().to_string(),
@@ -173,7 +171,7 @@ pub fn platform() -> Result<Platform, String> {
                 serial: get_raspberry_serial(),
                 events: raspberry::events(),
             }),
-            Err(_) => None, // Not a Raspberry Pi, that's OK
+            Err(_) => None,
         };
 
         return Ok(Platform {
@@ -183,9 +181,9 @@ pub fn platform() -> Result<Platform, String> {
     }
 
     #[cfg(not(feature = "raspberry"))]
-    return Ok(Platform {
+    Ok(Platform {
         generic: GenericPlatform::new(),
-    });
+    })
 }
 
 #[cfg(feature = "raspberry")]
