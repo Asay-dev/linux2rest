@@ -1,0 +1,431 @@
+[
+    {
+        "Id": "19b443f408e41622eef90df175b8609c76ee751d7dd8e409ef6ff96cc04c83be",
+        "Created": "2025-11-28T22:31:17.225284293Z",
+        "Path": "/bin/bash",
+        "Args": [
+            "-i",
+            "-c",
+            "/usr/bin/start-dwios-core && sleep infinity"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 1074,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2025-11-28T22:31:18.114696507Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:039193263409aaffcf953afadc27d1fae1593d2a0f91978bb1c8dc19c406dfb2",
+        "ResolvConfPath": "/var/lib/docker/containers/19b443f408e41622eef90df175b8609c76ee751d7dd8e409ef6ff96cc04c83be/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/19b443f408e41622eef90df175b8609c76ee751d7dd8e409ef6ff96cc04c83be/hostname",
+        "HostsPath": "/var/lib/docker/containers/19b443f408e41622eef90df175b8609c76ee751d7dd8e409ef6ff96cc04c83be/hosts",
+        "LogPath": "/var/lib/docker/containers/19b443f408e41622eef90df175b8609c76ee751d7dd8e409ef6ff96cc04c83be/19b443f408e41622eef90df175b8609c76ee751d7dd8e409ef6ff96cc04c83be-json.log",
+        "Name": "/dwios-core",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "/dev/:/dev/:rw",
+                "/sys/:/sys/:rw",
+                "/var/run/wpa_supplicant:/var/run/wpa_supplicant:rw",
+                "/tmp/wpa_playground:/tmp/wpa_playground:rw",
+                "/var/run/docker.sock:/var/run/docker.sock:rw",
+                "/var/logs/dwios:/var/logs/dwios:rw",
+                "/run/udev:/run/udev:ro",
+                "/home/dwirobo/.ssh:/home/dwirobo/.ssh:rw",
+                "/home/dwirobo/.docker:/home/dwirobo/.docker:rw",
+                "/root/.docker:/root/.docker:rw",
+                "/run/log/journal:/run/log/journal:ro",
+                "/var/log/journal:/var/log/journal:ro",
+                "/root/.majortom:/root/.majortom:rw",
+                "/etc/dwios:/etc/dwios:rw",
+                "/etc/machine-id:/etc/machine-id:ro",
+                "/etc/dhcpcd.conf:/etc/dhcpcd.conf:rw",
+                "/usr/dwios/userdata:/usr/dwios/userdata:rw",
+                "/usr/dwios/extensions:/usr/dwios/extensions:rw",
+                "/usr/dwios/bin:/usr/dwios/bin:rw",
+                "/etc/resolv.conf.host:/etc/resolv.conf.host:ro",
+                "/var/run/dbus:/var/run/dbus:rw",
+                "/root/.config/dwios:/root/.config:rw"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {
+                    "max-file": "3",
+                    "max-size": "30m"
+                }
+            },
+            "NetworkMode": "host",
+            "PortBindings": null,
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": true,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": [
+                "label=disable"
+            ],
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": null,
+            "ReadonlyPaths": null
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/var/logs/dwios",
+                "Destination": "/var/logs/dwios",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/root/.docker",
+                "Destination": "/root/.docker",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/root/.majortom",
+                "Destination": "/root/.majortom",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/run/log/journal",
+                "Destination": "/run/log/journal",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/log/journal",
+                "Destination": "/var/log/journal",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/etc/machine-id",
+                "Destination": "/etc/machine-id",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/etc/dhcpcd.conf",
+                "Destination": "/etc/dhcpcd.conf",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/usr/dwios/extensions",
+                "Destination": "/usr/dwios/extensions",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/run/udev",
+                "Destination": "/run/udev",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/dwirobo/.ssh",
+                "Destination": "/home/dwirobo/.ssh",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/usr/dwios/userdata",
+                "Destination": "/usr/dwios/userdata",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/etc/resolv.conf.host",
+                "Destination": "/etc/resolv.conf.host",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/run/dbus",
+                "Destination": "/var/run/dbus",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/sys",
+                "Destination": "/sys",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/tmp/wpa_playground",
+                "Destination": "/tmp/wpa_playground",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/dwirobo/.docker",
+                "Destination": "/home/dwirobo/.docker",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/etc/dwios",
+                "Destination": "/etc/dwios",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/usr/dwios/bin",
+                "Destination": "/usr/dwios/bin",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/root/.config/dwios",
+                "Destination": "/root/.config",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/dev",
+                "Destination": "/dev",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/run/wpa_supplicant",
+                "Destination": "/var/run/wpa_supplicant",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/run/docker.sock",
+                "Destination": "/var/run/docker.sock",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "dwirobo-rov-5ee095",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "USER_UID=1002",
+                "USER_GID=1002",
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+                "PYTHON_VERSION=3.11.7",
+                "PYTHON_PIP_VERSION=23.2.1",
+                "PYTHON_SETUPTOOLS_VERSION=65.5.1",
+                "PYTHON_GET_PIP_URL=https://github.com/pypa/get-pip/raw/049c52c665e8c5fd1751f942316e0a5c777d304f/public/get-pip.py",
+                "PYTHON_GET_PIP_SHA256=7cfd4bdc4d475ea971f1c0710a5953bcc704d171f83c797b9529d9974502fcc6",
+                "GIT_DESCRIBE_TAGS=0.0.0-0-g00000000",
+                "TARGETARCH=arm64",
+                "TARGETVARIANT="
+            ],
+            "Cmd": [
+                "/bin/bash",
+                "-i",
+                "-c",
+                "/usr/bin/start-dwios-core && sleep infinity"
+            ],
+            "Image": "dwios-core:latest",
+            "Volumes": {
+                "/dev/": {},
+                "/etc/dhcpcd.conf": {},
+                "/etc/dwios": {},
+                "/etc/machine-id": {},
+                "/etc/resolv.conf.host": {},
+                "/home/dwirobo/.docker": {},
+                "/home/dwirobo/.ssh": {},
+                "/root/.config": {},
+                "/root/.docker": {},
+                "/root/.majortom": {},
+                "/run/log/journal": {},
+                "/run/udev": {},
+                "/sys/": {},
+                "/tmp/wpa_playground": {},
+                "/usr/dwios/bin": {},
+                "/usr/dwios/extensions": {},
+                "/usr/dwios/userdata": {},
+                "/var/log/journal": {},
+                "/var/logs/dwios": {},
+                "/var/run/dbus": {},
+                "/var/run/docker.sock": {},
+                "/var/run/wpa_supplicant": {}
+            },
+            "WorkingDir": "",
+            "Entrypoint": null,
+            "Labels": {
+                "org.opencontainers.image.created": "2025-06-04T20:53:10.218Z",
+                "org.opencontainers.image.description": "Base docker for companion-docker project",
+                "org.opencontainers.image.licenses": "GPL-2.0",
+                "org.opencontainers.image.revision": "af737595def06827dd8154396e16a3694ce0b025",
+                "org.opencontainers.image.source": "https://github.com/bluerobotics/blueos-docker-base",
+                "org.opencontainers.image.title": "blueos-docker-base",
+                "org.opencontainers.image.url": "https://github.com/bluerobotics/blueos-docker-base",
+                "org.opencontainers.image.version": "0.2.2"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "3d8436c6bb65e62b09ca31e133b2e5f106a0713b016c0261c4f34f3b8e02ed02",
+            "SandboxKey": "/var/run/docker/netns/default",
+            "Ports": {},
+            "Networks": {
+                "host": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "6a3fab15a1dcf1937c109cdb49b2cdf0297bf95eba946bd4e514c24ede194978",
+                    "EndpointID": "938360b37b0721a085872814e2040ac331aa06cd8df8adee69fe5c88288c63c8",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:039193263409aaffcf953afadc27d1fae1593d2a0f91978bb1c8dc19c406dfb2",
+            "size": 4812,
+            "annotations": {
+                "io.containerd.image.name": "docker.io/dwios/core:latest",
+                "org.opencontainers.image.ref.name": "latest"
+            },
+            "platform": {
+                "architecture": "arm64",
+                "os": "linux"
+            }
+        }
+    }
+]
